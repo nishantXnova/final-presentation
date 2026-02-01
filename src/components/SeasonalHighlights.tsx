@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { Sun, Cloud, Leaf, Snowflake } from "lucide-react";
 
 const seasons = [
@@ -39,12 +40,41 @@ const seasons = [
   },
 ];
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.12,
+    },
+  },
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 30, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      duration: 0.5,
+      ease: [0.25, 0.46, 0.45, 0.94] as const,
+    },
+  },
+};
+
 const SeasonalHighlights = () => {
   return (
     <section className="section-padding bg-secondary">
       <div className="container-wide">
         {/* Section Header */}
-        <div className="text-center mb-16">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
+        >
           <p className="text-accent uppercase tracking-widest text-sm font-medium mb-4">
             Best Time to Visit
           </p>
@@ -54,23 +84,34 @@ const SeasonalHighlights = () => {
           <p className="text-body-large text-muted-foreground max-w-2xl mx-auto">
             Nepal offers unique experiences throughout the year. Discover what each season has to offer.
           </p>
-        </div>
+        </motion.div>
 
         {/* Seasons Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {seasons.map((season, index) => (
-            <div
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+        >
+          {seasons.map((season) => (
+            <motion.div
               key={season.name}
-              className="group bg-card rounded-2xl p-6 card-hover relative overflow-hidden"
-              style={{ animationDelay: `${index * 100}ms` }}
+              variants={cardVariants}
+              whileHover={{ y: -8, transition: { duration: 0.3 } }}
+              className="group bg-card rounded-2xl p-6 relative overflow-hidden shadow-soft hover:shadow-card transition-shadow duration-500"
             >
               {/* Icon */}
-              <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${season.color} flex items-center justify-center mb-4 shadow-soft`}>
+              <motion.div
+                whileHover={{ rotate: 10, scale: 1.1 }}
+                transition={{ type: "spring", stiffness: 300 }}
+                className={`w-14 h-14 rounded-xl bg-gradient-to-br ${season.color} flex items-center justify-center mb-4 shadow-soft`}
+              >
                 <season.icon className="h-7 w-7 text-primary-foreground" />
-              </div>
+              </motion.div>
 
               {/* Season Name */}
-              <h3 className="font-display text-xl font-semibold text-foreground mb-1">
+              <h3 className="font-display text-xl font-semibold text-foreground mb-1 group-hover:text-accent transition-colors duration-300">
                 {season.name}
               </h3>
               <p className="text-accent text-sm font-medium mb-3">{season.months}</p>
@@ -96,9 +137,9 @@ const SeasonalHighlights = () => {
               <p className="text-xs text-muted-foreground">
                 <span className="font-medium text-foreground">Best for:</span> {season.bestFor}
               </p>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

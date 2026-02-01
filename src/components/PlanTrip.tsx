@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { Search, Calendar, Users, DollarSign, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -24,7 +25,13 @@ const PlanTrip = () => {
 
       <div className="container-wide relative">
         {/* Section Header */}
-        <div className="text-center mb-12">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-12"
+        >
           <p className="text-primary-foreground/70 uppercase tracking-widest text-sm font-medium mb-4">
             Trip Planner
           </p>
@@ -34,20 +41,38 @@ const PlanTrip = () => {
           <p className="text-body-large text-primary-foreground/80 max-w-2xl mx-auto">
             Tell us how you want to explore, and we'll help you find the perfect itinerary.
           </p>
-        </div>
+        </motion.div>
 
         {/* Filter Card */}
-        <div className="bg-card rounded-3xl p-8 md:p-12 shadow-elevated max-w-4xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 40, scale: 0.95 }}
+          whileInView={{ opacity: 1, y: 0, scale: 1 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="bg-card rounded-3xl p-8 md:p-12 shadow-elevated max-w-4xl mx-auto"
+        >
           {/* Interest Filter */}
-          <div className="mb-8">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="mb-8"
+          >
             <label className="flex items-center gap-2 text-foreground font-medium mb-4">
               <Search className="h-5 w-5 text-accent" />
               What interests you?
             </label>
             <div className="flex flex-wrap gap-3">
-              {interests.map((interest) => (
-                <button
+              {interests.map((interest, index) => (
+                <motion.button
                   key={interest}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.3, delay: 0.1 + index * 0.05 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={() => setSelectedInterest(interest === selectedInterest ? null : interest)}
                   className={`px-5 py-2.5 rounded-full border-2 transition-all duration-300 ${
                     selectedInterest === interest
@@ -56,21 +81,33 @@ const PlanTrip = () => {
                   }`}
                 >
                   {interest}
-                </button>
+                </motion.button>
               ))}
             </div>
-          </div>
+          </motion.div>
 
           {/* Duration Filter */}
-          <div className="mb-8">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="mb-8"
+          >
             <label className="flex items-center gap-2 text-foreground font-medium mb-4">
               <Calendar className="h-5 w-5 text-accent" />
               How long is your trip?
             </label>
             <div className="flex flex-wrap gap-3">
-              {durations.map((duration) => (
-                <button
+              {durations.map((duration, index) => (
+                <motion.button
                   key={duration}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.3, delay: 0.2 + index * 0.05 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={() => setSelectedDuration(duration === selectedDuration ? null : duration)}
                   className={`px-5 py-2.5 rounded-full border-2 transition-all duration-300 ${
                     selectedDuration === duration
@@ -79,23 +116,34 @@ const PlanTrip = () => {
                   }`}
                 >
                   {duration}
-                </button>
+                </motion.button>
               ))}
             </div>
-          </div>
+          </motion.div>
 
           {/* Difficulty & Budget */}
           <div className="grid md:grid-cols-2 gap-8 mb-8">
             {/* Difficulty */}
-            <div>
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
               <label className="flex items-center gap-2 text-foreground font-medium mb-4">
                 <Filter className="h-5 w-5 text-accent" />
                 Difficulty level?
               </label>
               <div className="flex flex-wrap gap-3">
-                {difficulties.map((difficulty) => (
-                  <button
+                {difficulties.map((difficulty, index) => (
+                  <motion.button
                     key={difficulty}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.3, delay: 0.3 + index * 0.05 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => setSelectedDifficulty(difficulty === selectedDifficulty ? null : difficulty)}
                     className={`px-5 py-2.5 rounded-full border-2 transition-all duration-300 ${
                       selectedDifficulty === difficulty
@@ -104,21 +152,32 @@ const PlanTrip = () => {
                     }`}
                   >
                     {difficulty}
-                  </button>
+                  </motion.button>
                 ))}
               </div>
-            </div>
+            </motion.div>
 
             {/* Budget */}
-            <div>
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
               <label className="flex items-center gap-2 text-foreground font-medium mb-4">
                 <DollarSign className="h-5 w-5 text-accent" />
                 What's your budget?
               </label>
               <div className="flex flex-wrap gap-3">
-                {budgets.map((budget) => (
-                  <button
+                {budgets.map((budget, index) => (
+                  <motion.button
                     key={budget}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.3, delay: 0.3 + index * 0.05 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => setSelectedBudget(budget === selectedBudget ? null : budget)}
                     className={`px-5 py-2.5 rounded-full border-2 transition-all duration-300 ${
                       selectedBudget === budget
@@ -127,22 +186,31 @@ const PlanTrip = () => {
                     }`}
                   >
                     {budget}
-                  </button>
+                  </motion.button>
                 ))}
               </div>
-            </div>
+            </motion.div>
           </div>
 
           {/* CTA */}
-          <Button 
-            size="lg" 
-            className="w-full btn-accent text-lg py-6"
-            disabled={!selectedInterest || !selectedDuration}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
-            <Users className="mr-2 h-5 w-5" />
-            Find My Perfect Trip
-          </Button>
-        </div>
+            <Button 
+              size="lg" 
+              className="w-full btn-accent text-lg py-6"
+              disabled={!selectedInterest || !selectedDuration}
+            >
+              <Users className="mr-2 h-5 w-5" />
+              Find My Perfect Trip
+            </Button>
+          </motion.div>
+        </motion.div>
       </div>
     </section>
   );

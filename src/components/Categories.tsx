@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { Mountain, Landmark, Trees, Sparkles } from "lucide-react";
 
 const categories = [
@@ -27,12 +28,40 @@ const categories = [
   },
 ];
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15,
+    },
+  },
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 40 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.6,
+      ease: [0.25, 0.46, 0.45, 0.94] as const,
+    },
+  },
+};
+
 const Categories = () => {
   return (
     <section id="categories" className="section-padding bg-secondary">
       <div className="container-wide">
         {/* Section Header */}
-        <div className="text-center mb-16">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
+        >
           <p className="text-accent uppercase tracking-widest text-sm font-medium mb-4">
             Find Your Experience
           </p>
@@ -43,26 +72,39 @@ const Categories = () => {
             Whether you seek adventure, culture, nature, or spiritual awakening, 
             Nepal offers experiences that will transform your journey.
           </p>
-        </div>
+        </motion.div>
 
         {/* Category Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {categories.map((category, index) => (
-            <div
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+        >
+          {categories.map((category) => (
+            <motion.div
               key={category.title}
-              className="group relative bg-card rounded-2xl p-8 card-hover cursor-pointer overflow-hidden"
-              style={{ animationDelay: `${index * 100}ms` }}
+              variants={cardVariants}
+              whileHover={{ y: -10, transition: { duration: 0.3 } }}
+              className="group relative bg-card rounded-2xl p-8 cursor-pointer overflow-hidden shadow-soft hover:shadow-card transition-shadow duration-500"
             >
               {/* Gradient Background on Hover */}
-              <div className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
+              <motion.div 
+                className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} 
+              />
               
               {/* Icon */}
-              <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${category.color} flex items-center justify-center mb-6 shadow-soft group-hover:scale-110 transition-transform duration-500`}>
+              <motion.div 
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                transition={{ type: "spring", stiffness: 300 }}
+                className={`w-16 h-16 rounded-xl bg-gradient-to-br ${category.color} flex items-center justify-center mb-6 shadow-soft`}
+              >
                 <category.icon className="h-8 w-8 text-primary-foreground" />
-              </div>
+              </motion.div>
 
               {/* Content */}
-              <h3 className="font-display text-2xl font-semibold text-foreground mb-3 group-hover:text-accent transition-colors">
+              <h3 className="font-display text-2xl font-semibold text-foreground mb-3 group-hover:text-accent transition-colors duration-300">
                 {category.title}
               </h3>
               <p className="text-muted-foreground leading-relaxed">
@@ -72,11 +114,17 @@ const Categories = () => {
               {/* Arrow */}
               <div className="mt-6 flex items-center text-accent font-medium">
                 <span className="mr-2">Explore</span>
-                <span className="transform group-hover:translate-x-2 transition-transform duration-300">→</span>
+                <motion.span
+                  initial={{ x: 0 }}
+                  whileHover={{ x: 5 }}
+                  className="transform group-hover:translate-x-2 transition-transform duration-300"
+                >
+                  →
+                </motion.span>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );
