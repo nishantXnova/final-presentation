@@ -1,13 +1,119 @@
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, MapPin, Clock, Star, Calendar, Mountain, AlertCircle, FileText } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ArrowLeft, MapPin, Clock, Star, Calendar, Mountain, AlertCircle, FileText, Bookmark, BookmarkCheck, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getDestinationById } from "@/data/destinations";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import DestinationReviews from "@/components/DestinationReviews";
+import AIChatbot from "@/components/AIChatbot";
 
 const DestinationDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const { user } = useAuth();
+  const { toast } = useToast();
   const destination = getDestinationById(id || "");
+  const [isSaved, setIsSaved] = useState(false);
+  const [savingState, setSavingState] = useState(false);
+  const [placeId, setPlaceId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (destination && user) {
+      checkIfSaved();
+    }
+  }, [destination, user]);
+
+  const checkIfSaved = async () => {
+    if (!user || !destination) return;
+
+    try {
+      // First find or create the place in our database
+      const { data: existingPlace } = await supabase
+        .from('places')
+        .select('id')
+        .eq('name', destination.name)
+        .maybeSingle();
+
+      if (existingPlace) {
+        setPlaceId(existingPlace.id);
+
+        // Check if saved
+        const { data: savedData } = await supabase
+          .from('saved_places')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('place_id', existingPlace.id)
+          .maybeSingle();
+
+        setIsSaved(!!savedData);
+      }
+    } catch (error) {
+      console.error('Error checking saved status:', error);
+    }
+  };
+
+  const handleToggleSave = async () => {
+    if (!user) {
+      toast({ title: 'Please sign in to save places' });
+      return;
+    }
+    if (!destination) return;
+
+    setSavingState(true);
+    try {
+      let currentPlaceId = placeId;
+
+      // Create place if it doesn't exist
+      if (!currentPlaceId) {
+        const { data: newPlace, error: createError } = await supabase
+          .from('places')
+          .insert({
+            name: destination.name,
+            description: destination.description,
+            category: destination.category,
+            image_url: destination.image,
+          })
+          .select('id')
+          .single();
+
+        if (createError) throw createError;
+        currentPlaceId = newPlace.id;
+        setPlaceId(currentPlaceId);
+      }
+
+      if (isSaved) {
+        // Remove from saved
+        const { error } = await supabase
+          .from('saved_places')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('place_id', currentPlaceId);
+
+        if (error) throw error;
+        setIsSaved(false);
+        toast({ title: 'Removed from saved places' });
+      } else {
+        // Add to saved
+        const { error } = await supabase
+          .from('saved_places')
+          .insert({
+            user_id: user.id,
+            place_id: currentPlaceId,
+          });
+
+        if (error) throw error;
+        setIsSaved(true);
+        toast({ title: 'Added to saved places!' });
+      }
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'Error', description: error.message });
+    } finally {
+      setSavingState(false);
+    }
+  };
 
   if (!destination) {
     return (
@@ -44,12 +150,31 @@ const DestinationDetail = () => {
         <div className="absolute inset-0 flex items-end">
           <div className="container-wide pb-12">
             {/* Back Button */}
-            <Link to="/">
-              <Button variant="outline" className="mb-6 border-primary-foreground/50 text-primary-foreground bg-transparent hover:bg-primary-foreground/10">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Home
+            <div className="flex items-center justify-between mb-6">
+              <Link to="/">
+                <Button variant="outline" className="border-primary-foreground/50 text-primary-foreground bg-transparent hover:bg-primary-foreground/10">
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back to Home
+                </Button>
+              </Link>
+              <Button
+                variant="outline"
+                onClick={handleToggleSave}
+                disabled={savingState}
+                className={`border-primary-foreground/50 bg-transparent hover:bg-primary-foreground/10 ${
+                  isSaved ? 'text-nepal-gold border-nepal-gold' : 'text-primary-foreground'
+                }`}
+              >
+                {savingState ? (
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                ) : isSaved ? (
+                  <BookmarkCheck className="w-4 h-4 mr-2" />
+                ) : (
+                  <Bookmark className="w-4 h-4 mr-2" />
+                )}
+                {isSaved ? 'Saved' : 'Save'}
               </Button>
-            </Link>
+            </div>
             
             <span className="inline-block bg-accent text-accent-foreground px-4 py-1.5 rounded-full text-sm font-medium mb-4">
               {destination.category}
@@ -164,6 +289,11 @@ const DestinationDetail = () => {
                   ))}
                 </div>
               </div>
+
+              {/* Reviews Section */}
+              {placeId && (
+                <DestinationReviews placeId={placeId} />
+              )}
             </div>
 
             {/* Right Column - Sidebar */}
@@ -232,6 +362,7 @@ const DestinationDetail = () => {
       </section>
 
       <Footer />
+      <AIChatbot />
     </div>
   );
 };

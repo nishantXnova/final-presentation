@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, Mountain, User, LogIn } from "lucide-react";
+import { Menu, X, Mountain, User, LogIn, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -10,7 +10,7 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const isHomePage = location.pathname === "/";
-  const { user, loading } = useAuth();
+  const { user, loading, isAdmin } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -85,18 +85,34 @@ const Navbar = () => {
           {/* Auth Button */}
           {!loading && (
             user ? (
-              <Button
-                onClick={() => navigate("/profile")}
-                variant="ghost"
-                size="icon"
-                className={`rounded-full transition-all duration-300 ${
-                  isScrolled
-                    ? "text-foreground hover:bg-muted"
-                    : "text-primary-foreground hover:bg-primary-foreground/20"
-                }`}
-              >
-                <User className="h-5 w-5" />
-              </Button>
+              <div className="flex items-center gap-2">
+                {isAdmin && (
+                  <Button
+                    onClick={() => navigate("/admin")}
+                    variant="ghost"
+                    size="icon"
+                    className={`rounded-full transition-all duration-300 ${
+                      isScrolled
+                        ? "text-foreground hover:bg-muted"
+                        : "text-primary-foreground hover:bg-primary-foreground/20"
+                    }`}
+                  >
+                    <Shield className="h-5 w-5" />
+                  </Button>
+                )}
+                <Button
+                  onClick={() => navigate("/profile")}
+                  variant="ghost"
+                  size="icon"
+                  className={`rounded-full transition-all duration-300 ${
+                    isScrolled
+                      ? "text-foreground hover:bg-muted"
+                      : "text-primary-foreground hover:bg-primary-foreground/20"
+                  }`}
+                >
+                  <User className="h-5 w-5" />
+                </Button>
+              </div>
             ) : (
               <Button
                 onClick={() => navigate("/auth")}
@@ -144,16 +160,31 @@ const Navbar = () => {
             
             {!loading && (
               user ? (
-                <Button 
-                  className="btn-primary w-full mt-2"
-                  onClick={() => {
-                    setIsMobileMenuOpen(false);
-                    navigate("/profile");
-                  }}
-                >
-                  <User className="h-4 w-4 mr-2" />
-                  My Profile
-                </Button>
+                <>
+                  {isAdmin && (
+                    <Button 
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        navigate("/admin");
+                      }}
+                    >
+                      <Shield className="h-4 w-4 mr-2" />
+                      Admin Dashboard
+                    </Button>
+                  )}
+                  <Button 
+                    className="btn-primary w-full mt-2"
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      navigate("/profile");
+                    }}
+                  >
+                    <User className="h-4 w-4 mr-2" />
+                    My Profile
+                  </Button>
+                </>
               ) : (
                 <Button 
                   className="btn-primary w-full mt-2"

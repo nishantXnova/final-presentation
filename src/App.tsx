@@ -8,6 +8,8 @@ import Index from "./pages/Index";
 import DestinationDetail from "./pages/DestinationDetail";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
+import SavedPlaces from "./pages/SavedPlaces";
+import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 
@@ -29,6 +31,22 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Profile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/saved-places"
+              element={
+                <ProtectedRoute>
+                  <SavedPlaces />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminDashboard />
                 </ProtectedRoute>
               }
             />

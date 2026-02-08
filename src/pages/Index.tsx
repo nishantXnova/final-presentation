@@ -8,6 +8,7 @@ import PlanTrip from "@/components/PlanTrip";
 import Partners from "@/components/Partners";
 import TravelInfo from "@/components/TravelInfo";
 import Footer from "@/components/Footer";
+import AIChatbot from "@/components/AIChatbot";
 
 const Index = () => {
   return (
@@ -22,6 +23,7 @@ const Index = () => {
       <Partners />
       <TravelInfo />
       <Footer />
+      <AIChatbot />
     </div>
   );
 };

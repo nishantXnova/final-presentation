@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { User, Mail, Camera, Save, Loader2, LogOut, Shield, Bookmark } from 'lucide-react';
+import { User, Mail, Camera, Save, Loader2, LogOut, Shield, Bookmark, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -8,7 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 interface Profile {
   id: string;
@@ -19,6 +19,7 @@ interface Profile {
 const Profile = () => {
   const { user, signOut, isAdmin } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -190,6 +191,20 @@ const Profile = () => {
                 </Button>
               </Link>
             </div>
+
+            {isAdmin && (
+              <>
+                <hr className="border-border" />
+                <Button
+                  variant="outline"
+                  onClick={() => navigate('/admin')}
+                  className="w-full"
+                >
+                  <LayoutDashboard className="w-4 h-4 mr-2" />
+                  Admin Dashboard
+                </Button>
+              </>
+            )}
 
             <hr className="border-border" />
 
