@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { MapPin, Clock, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { destinations } from "@/data/destinations";
+import BookmarkButton from "@/components/BookmarkButton";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -88,10 +89,21 @@ const Destinations = () => {
                     {destination.category}
                   </motion.span>
 
-                  {/* Rating */}
-                  <div className="absolute top-4 right-4 flex items-center gap-1 bg-background/90 backdrop-blur-sm px-2 py-1 rounded-full">
-                    <Star className="h-3 w-3 fill-nepal-gold text-nepal-gold" />
-                    <span className="text-xs font-medium text-foreground">{destination.rating}</span>
+                  {/* Rating & Bookmark */}
+                  <div className="absolute top-4 right-4 flex items-center gap-2">
+                    <div className="flex items-center gap-1 bg-background/90 backdrop-blur-sm px-2 py-1 rounded-full">
+                      <Star className="h-3 w-3 fill-nepal-gold text-nepal-gold" />
+                      <span className="text-xs font-medium text-foreground">{destination.rating}</span>
+                    </div>
+                    <BookmarkButton
+                      placeName={destination.name}
+                      placeData={{
+                        description: destination.description,
+                        category: destination.category,
+                        image_url: destination.image,
+                      }}
+                      variant="overlay"
+                    />
                   </div>
 
                   {/* Title Overlay */}
