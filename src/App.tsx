@@ -11,6 +11,7 @@ import Profile from "./pages/Profile";
 import SavedPlaces from "./pages/SavedPlaces";
 import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
+import CategoryPage from "./pages/CategoryPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/destination/:id" element={<DestinationDetail />} />
+            <Route path="/category/:slug" element={<CategoryPage />} />
             <Route
               path="/profile"
               element={

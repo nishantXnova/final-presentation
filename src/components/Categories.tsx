@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Mountain, Landmark, Trees, Sparkles } from "lucide-react";
 
@@ -5,24 +6,28 @@ const categories = [
   {
     icon: Mountain,
     title: "Adventure",
+    slug: "adventure",
     description: "Trek to Everest Base Camp, conquer mountain passes, and experience world-class adventures.",
     color: "from-nepal-sky to-primary",
   },
   {
     icon: Landmark,
     title: "Culture",
+    slug: "culture",
     description: "Explore ancient temples, vibrant festivals, and centuries-old traditions.",
     color: "from-nepal-terracotta to-accent",
   },
   {
     icon: Trees,
     title: "Nature",
+    slug: "nature",
     description: "Discover pristine national parks, rare wildlife, and breathtaking landscapes.",
     color: "from-nepal-forest to-nepal-sky",
   },
   {
     icon: Sparkles,
     title: "Spirituality",
+    slug: "spirituality",
     description: "Find peace at sacred sites, monasteries, and the birthplace of Buddha.",
     color: "from-nepal-gold to-nepal-terracotta",
   },
@@ -83,11 +88,11 @@ const Categories = () => {
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
         >
           {categories.map((category) => (
+            <Link key={category.title} to={`/category/${category.slug}`}>
             <motion.div
-              key={category.title}
               variants={cardVariants}
               whileHover={{ y: -10, transition: { duration: 0.3 } }}
-              className="group relative bg-card rounded-2xl p-8 cursor-pointer overflow-hidden shadow-soft hover:shadow-card transition-shadow duration-500"
+              className="group relative bg-card rounded-2xl p-8 cursor-pointer overflow-hidden shadow-soft hover:shadow-card transition-shadow duration-500 h-full"
             >
               {/* Gradient Background on Hover */}
               <motion.div 
@@ -123,6 +128,7 @@ const Categories = () => {
                 </motion.span>
               </div>
             </motion.div>
+            </Link>
           ))}
         </motion.div>
       </div>
