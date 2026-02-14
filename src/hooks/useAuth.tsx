@@ -28,9 +28,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Check admin status using the secure database function
-          const { data } = await supabase.rpc('is_admin', { _user_id: session.user.id });
-          setIsAdmin(!!data);
+          try {
+            const { data } = await supabase.rpc('is_admin', { _user_id: session.user.id });
+            setIsAdmin(!!data);
+          } catch {
+            setIsAdmin(false);
+          }
         } else {
           setIsAdmin(false);
         }
@@ -40,18 +43,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     );
 
     // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        supabase.rpc('is_admin', { _user_id: session.user.id }).then(({ data }) => {
-          setIsAdmin(!!data);
-        });
+    const checkSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          try {
+            const { data } = await supabase.rpc('is_admin', { _user_id: session.user.id });
+            setIsAdmin(!!data);
+          } catch {
+            setIsAdmin(false);
+          }
+        }
+      } catch {
+        // Session check failed
+      } finally {
+        setLoading(false);
       }
-      
-      setLoading(false);
-    });
+    };
+    checkSession();
 
     return () => subscription.unsubscribe();
   }, []);
