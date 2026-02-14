@@ -1,9 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { ArrowRightLeft, RefreshCw, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 const currencies = [
@@ -19,6 +18,45 @@ const currencies = [
   { code: "THB", name: "Thai Baht", flag: "🇹🇭" },
 ];
 
+// In-memory cache for exchange rates keyed by base currency
+const rateCache: Record<string, { rates: Record<string, number>; ts: number }> = {};
+const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+
+async function fetchRates(baseCurrency: string): Promise<Record<string, number>> {
+  const key = baseCurrency.toLowerCase();
+
+  // Return cached data if fresh
+  const cached = rateCache[key];
+  if (cached && Date.now() - cached.ts < CACHE_TTL) {
+    return cached.rates;
+  }
+
+  const primaryUrl = `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/${key}.min.json`;
+  const fallbackUrl = `https://latest.currency-api.pages.dev/v1/currencies/${key}.min.json`;
+
+  let data: any;
+
+  try {
+    const res = await fetch(primaryUrl);
+    if (!res.ok) throw new Error(`Primary CDN returned ${res.status}`);
+    data = await res.json();
+  } catch {
+    // Fallback to Cloudflare Pages mirror
+    const res = await fetch(fallbackUrl);
+    if (!res.ok) throw new Error("Unable to fetch exchange rates. Please try again later.");
+    data = await res.json();
+  }
+
+  const rates: Record<string, number> | undefined = data?.[key];
+  if (!rates || typeof rates !== "object") {
+    throw new Error("Unexpected API response format.");
+  }
+
+  // Cache the result
+  rateCache[key] = { rates, ts: Date.now() };
+  return rates;
+}
+
 const CurrencyConverter = () => {
   const [amount, setAmount] = useState("1");
   const [from, setFrom] = useState("USD");
@@ -27,28 +65,47 @@ const CurrencyConverter = () => {
   const [rate, setRate] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const isMounted = useRef(true);
 
-  const convert = async () => {
-    if (!amount || isNaN(Number(amount))) return;
+  useEffect(() => {
+    isMounted.current = true;
+    return () => { isMounted.current = false; };
+  }, []);
+
+  const convert = useCallback(async () => {
+    const numericAmount = Number(amount);
+    if (!amount || isNaN(numericAmount) || numericAmount <= 0) return;
+
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("currency-converter", {
-        body: { from, to, amount: Number(amount) },
-      });
-      if (error) throw error;
-      if (data.error) throw new Error(data.error);
-      setResult(data.converted);
-      setRate(data.rate);
+      const rates = await fetchRates(from);
+      const toKey = to.toLowerCase();
+      const exchangeRate = rates[toKey];
+
+      if (exchangeRate == null) {
+        throw new Error(`Rate for ${from} to ${to} is not available.`);
+      }
+
+      if (!isMounted.current) return;
+
+      const converted = (numericAmount * exchangeRate).toFixed(2);
+      setRate(exchangeRate);
+      setResult(converted);
     } catch (err: any) {
-      toast({ title: "Conversion failed", description: err.message, variant: "destructive" });
+      if (!isMounted.current) return;
+      toast({
+        title: "Conversion failed",
+        description: err?.message || "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
     } finally {
-      setLoading(false);
+      if (isMounted.current) setLoading(false);
     }
-  };
+  }, [amount, from, to, toast]);
 
   useEffect(() => {
     convert();
-  }, [from, to]);
+  }, [from, to, convert]);
 
   const swap = () => {
     setFrom(to);
