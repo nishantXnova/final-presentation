@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, Mountain, User, LogIn, Shield } from "lucide-react";
+import { Menu, X, Mountain, User, LogIn, Shield, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -47,8 +47,8 @@ const Navbar = () => {
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled
-          ? "glass-effect shadow-soft py-3"
-          : "bg-transparent py-5"
+        ? "glass-effect shadow-soft py-3"
+        : "bg-transparent py-5"
         }`}
     >
       <div className="container-wide flex items-center justify-between">
@@ -89,20 +89,31 @@ const Navbar = () => {
                     variant="ghost"
                     size="icon"
                     className={`rounded-full transition-all duration-300 ${isScrolled
-                        ? "text-foreground hover:bg-muted"
-                        : "text-primary-foreground hover:bg-primary-foreground/20"
+                      ? "text-foreground hover:bg-muted"
+                      : "text-primary-foreground hover:bg-primary-foreground/20"
                       }`}
                   >
                     <Shield className="h-5 w-5" />
                   </Button>
                 )}
                 <Button
+                  onClick={() => navigate("/saved-places")}
+                  variant="ghost"
+                  size="icon"
+                  className={`rounded-full transition-all duration-300 ${isScrolled
+                    ? "text-foreground hover:bg-muted"
+                    : "text-primary-foreground hover:bg-primary-foreground/20"
+                    }`}
+                >
+                  <Bookmark className="h-5 w-5" />
+                </Button>
+                <Button
                   onClick={() => navigate("/profile")}
                   variant="ghost"
                   size="icon"
                   className={`rounded-full transition-all duration-300 ${isScrolled
-                      ? "text-foreground hover:bg-muted"
-                      : "text-primary-foreground hover:bg-primary-foreground/20"
+                    ? "text-foreground hover:bg-muted"
+                    : "text-primary-foreground hover:bg-primary-foreground/20"
                     }`}
                 >
                   <User className="h-5 w-5" />
@@ -112,8 +123,8 @@ const Navbar = () => {
               <Button
                 onClick={() => navigate("/auth")}
                 className={`transition-all duration-300 ${isScrolled
-                    ? "btn-primary"
-                    : "bg-primary-foreground text-primary hover:bg-primary-foreground/90"
+                  ? "btn-primary"
+                  : "bg-primary-foreground text-primary hover:bg-primary-foreground/90"
                   }`}
               >
                 <LogIn className="h-4 w-4 mr-2" />
@@ -167,6 +178,17 @@ const Navbar = () => {
                       Admin Dashboard
                     </Button>
                   )}
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      navigate("/saved-places");
+                    }}
+                  >
+                    <Bookmark className="h-4 w-4 mr-2" />
+                    Saved History
+                  </Button>
                   <Button
                     className="btn-primary w-full mt-2"
                     onClick={() => {

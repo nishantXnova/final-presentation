@@ -58,7 +58,7 @@ const SavedPlaces = () => {
         .order('saved_at', { ascending: false });
 
       if (error) throw error;
-      
+
       // Filter out any entries where place might be null (if place was deleted)
       const validPlaces = (data || []).filter(sp => sp.place !== null) as SavedPlace[];
       setSavedPlaces(validPlaces);
@@ -103,10 +103,10 @@ const SavedPlaces = () => {
             </Link>
             <div>
               <h1 className="heading-section text-3xl flex items-center gap-3">
-                <Bookmark className="w-8 h-8 text-accent" />
-                Saved Places
+                <Bookmark className="w-8 h-8 text-nepal-terracotta animate-pulse-slow" />
+                Travel History
               </h1>
-              <p className="text-muted-foreground mt-1">Your bookmarked destinations</p>
+              <p className="text-muted-foreground mt-1">Your bookmarked destinations & journey record</p>
             </div>
           </div>
 
@@ -129,7 +129,7 @@ const SavedPlaces = () => {
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 md:gap-8">
               {savedPlaces.map((saved, index) => (
                 <motion.div
                   key={saved.id}
@@ -187,8 +187,8 @@ const SavedPlaces = () => {
                         <Star className="w-4 h-4 fill-nepal-gold text-nepal-gold" />
                         <span className="text-sm font-medium">{saved.place.rating || 0}</span>
                       </div>
-                      <p className="text-xs text-muted-foreground">
-                        Saved {new Date(saved.saved_at).toLocaleDateString()}
+                      <p className="text-[10px] sm:text-xs text-muted-foreground font-medium bg-muted/50 px-2 py-0.5 rounded-full">
+                        Saved {new Date(saved.saved_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                       </p>
                     </div>
                   </div>
