@@ -222,25 +222,14 @@ const NearbyPlaces = () => {
                         </p>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row items-center gap-4">
-                        <div className="flex items-center gap-2 bg-muted/30 px-4 py-2 rounded-full border border-border/50">
-                            {showNearby ? <Eye className="w-4 h-4 text-nepal-stone" /> : <EyeOff className="w-4 h-4 text-muted-foreground" />}
-                            <span className="text-xs font-semibold text-nepal-stone whitespace-nowrap">Nearby Discovery</span>
-                            <Switch
-                                checked={showNearby}
-                                onCheckedChange={toggleNearby}
-                                className="scale-75 data-[state=checked]:bg-nepal-terracotta"
-                            />
-                        </div>
-                        <Button
-                            onClick={requestLocation}
-                            disabled={loading || !showNearby}
-                            className="bg-nepal-terracotta hover:bg-nepal-terracotta/90 text-white gap-2 h-12 px-6 rounded-full transition-all hover:scale-105 active:scale-95 shadow-lg shadow-nepal-terracotta/20 disabled:opacity-50 disabled:hover:scale-100"
-                        >
-                            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Navigation className="w-5 h-5" />}
-                            {location ? "Refresh Location" : "Find Nearby Places"}
-                        </Button>
-                    </div>
+                    <Button
+                        onClick={requestLocation}
+                        disabled={loading || !showNearby}
+                        className="bg-nepal-terracotta hover:bg-nepal-terracotta/90 text-white gap-2 h-12 px-6 rounded-full transition-all hover:scale-105 active:scale-95 shadow-lg shadow-nepal-terracotta/20 disabled:opacity-50 disabled:hover:scale-100"
+                    >
+                        {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Navigation className="w-5 h-5" />}
+                        {location ? "Refresh Location" : "Find Nearby Places"}
+                    </Button>
                 </div>
 
                 {error && (
@@ -348,74 +337,104 @@ const NearbyPlaces = () => {
 
                         {/* Map Overlay Controls */}
                         {location && (
-                            <div className="absolute top-4 right-4 z-[400] flex flex-col gap-2">
-                                {!homeLocation ? (
-                                    <Button
-                                        onClick={saveHomeBase}
-                                        className="bg-nepal-gold hover:bg-nepal-gold/90 text-white rounded-full w-12 h-12 p-0 shadow-lg transition-all hover:scale-110"
-                                        title="Set Current Location as Home Base"
-                                    >
-                                        <Home className="w-5 h-5" />
-                                    </Button>
-                                ) : (
-                                    <div className="flex flex-col gap-2">
-                                        <Button
-                                            onClick={clearHomeBase}
-                                            className="bg-white hover:bg-red-50 text-red-600 rounded-full w-12 h-12 p-0 shadow-lg border border-red-100 transition-all hover:scale-110"
-                                            title="Clear Home Base"
-                                        >
-                                            <MapPinOff className="w-5 h-5" />
-                                        </Button>
-                                        <Button
-                                            onClick={initiateReturn}
-                                            className={cn(
-                                                "rounded-full h-12 px-6 gap-2 shadow-lg transition-all hover:scale-105 active:scale-95 text-white border-none",
-                                                distanceToHome && distanceToHome > comfortRadius
-                                                    ? "bg-red-600 hover:bg-red-700 animate-pulse"
-                                                    : "bg-nepal-terracotta hover:bg-nepal-terracotta/90"
-                                            )}
-                                        >
-                                            <RotateCcw className="w-4 h-4" />
-                                            <span>Take Me Back</span>
-                                        </Button>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        {/* Distance Badge */}
-                        {location && homeLocation && distanceToHome !== null && (
-                            <div className="absolute bottom-4 left-4 z-[400]">
-                                <Badge className={cn(
-                                    "px-4 py-2 border shadow-lg flex items-center gap-2 text-sm",
-                                    distanceToHome > comfortRadius
-                                        ? "bg-red-50 text-red-600 border-red-200"
-                                        : "bg-white text-nepal-gold border-nepal-gold/20"
-                                )}>
-                                    {distanceToHome > comfortRadius ? <ShieldAlert className="w-4 h-4" /> : <MapPin className="w-4 h-4" />}
-                                    <span>{Math.round(distanceToHome)}m to Home Base</span>
-                                </Badge>
-                                <div className="mt-2 bg-white/80 backdrop-blur-md px-3 py-3 rounded-xl text-[10px] text-muted-foreground shadow-sm border border-black/5 flex flex-col gap-2">
-                                    <div className="flex flex-col gap-1.5">
-                                        <Label htmlFor="radius-input" className="text-[9px] uppercase tracking-wider font-bold opacity-70">Comfort Radius (meters)</Label>
-                                        <div className="flex items-center gap-2">
-                                            <Input
-                                                id="radius-input"
-                                                type="number"
-                                                value={radiusInput}
-                                                onChange={handleRadiusChange}
-                                                className="h-7 w-20 text-[10px] bg-white/50 border-nepal-gold/20 focus-visible:ring-nepal-gold transition-all"
-                                            />
-                                            <span className="text-[10px] font-medium opacity-60">m</span>
+                            <>
+                                <div className="absolute top-4 left-4 z-[400]">
+                                    <div className="flex items-center gap-3 bg-white px-4 py-2.5 rounded-full shadow-elevated border border-nepal-gold/20 animate-in fade-in slide-in-from-left-4 duration-500">
+                                        {showNearby ? (
+                                            <div className="bg-nepal-terracotta/10 p-1.5 rounded-full">
+                                                <Eye className="w-4 h-4 text-nepal-terracotta" />
+                                            </div>
+                                        ) : (
+                                            <div className="bg-muted p-1.5 rounded-full">
+                                                <EyeOff className="w-4 h-4 text-muted-foreground" />
+                                            </div>
+                                        )}
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] font-bold uppercase tracking-wider text-nepal-stone/60 leading-none mb-1">Nearby Mode</span>
+                                            <span className={cn(
+                                                "text-xs font-bold leading-none",
+                                                showNearby ? "text-nepal-terracotta" : "text-muted-foreground"
+                                            )}>
+                                                {showNearby ? "Live Discovery ON" : "Discovery OFF"}
+                                            </span>
                                         </div>
-                                    </div>
-                                    <div className="pt-1 border-t border-black/5">
-                                        <span className="font-mono block italic">Lat: {homeLocation.lat.toFixed(6)}</span>
-                                        <span className="font-mono block italic">Lon: {homeLocation.lng.toFixed(6)}</span>
-                                        <span className="mt-1 flex items-center gap-1 opacity-70"><ExternalLink className="w-3 h-3" /> External OS Nav Ready</span>
+                                        <Switch
+                                            checked={showNearby}
+                                            onCheckedChange={toggleNearby}
+                                            className="data-[state=checked]:bg-nepal-terracotta"
+                                        />
                                     </div>
                                 </div>
-                            </div>
+
+                                <div className="absolute top-4 right-4 z-[400] flex flex-col gap-2">
+                                    {!homeLocation ? (
+                                        <Button
+                                            onClick={saveHomeBase}
+                                            className="bg-nepal-gold hover:bg-nepal-gold/90 text-white rounded-full w-12 h-12 p-0 shadow-lg transition-all hover:scale-110"
+                                            title="Set Current Location as Home Base"
+                                        >
+                                            <Home className="w-5 h-5" />
+                                        </Button>
+                                    ) : (
+                                        <div className="flex flex-col gap-2">
+                                            <Button
+                                                onClick={clearHomeBase}
+                                                className="bg-white hover:bg-red-50 text-red-600 rounded-full w-12 h-12 p-0 shadow-lg border border-red-100 transition-all hover:scale-110"
+                                                title="Clear Home Base"
+                                            >
+                                                <MapPinOff className="w-5 h-5" />
+                                            </Button>
+                                            <Button
+                                                onClick={initiateReturn}
+                                                className={cn(
+                                                    "rounded-full h-12 px-6 gap-2 shadow-lg transition-all hover:scale-105 active:scale-95 text-white border-none",
+                                                    distanceToHome && distanceToHome > comfortRadius
+                                                        ? "bg-red-600 hover:bg-red-700 animate-pulse"
+                                                        : "bg-nepal-terracotta hover:bg-nepal-terracotta/90"
+                                                )}
+                                            >
+                                                <RotateCcw className="w-4 h-4" />
+                                                <span>Take Me Back</span>
+                                            </Button>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Distance Badge */}
+                                {homeLocation && distanceToHome !== null && (
+                                    <div className="absolute bottom-4 left-4 z-[400]">
+                                        <Badge className={cn(
+                                            "px-4 py-2 border shadow-lg flex items-center gap-2 text-sm",
+                                            distanceToHome > comfortRadius
+                                                ? "bg-red-50 text-red-600 border-red-200"
+                                                : "bg-white text-nepal-gold border-nepal-gold/20"
+                                        )}>
+                                            {distanceToHome > comfortRadius ? <ShieldAlert className="w-4 h-4" /> : <MapPin className="w-4 h-4" />}
+                                            <span>{Math.round(distanceToHome)}m to Home Base</span>
+                                        </Badge>
+                                        <div className="mt-2 bg-white/80 backdrop-blur-md px-3 py-3 rounded-xl text-[10px] text-muted-foreground shadow-sm border border-black/5 flex flex-col gap-2">
+                                            <div className="flex flex-col gap-1.5">
+                                                <Label htmlFor="radius-input" className="text-[9px] uppercase tracking-wider font-bold opacity-70">Comfort Radius (meters)</Label>
+                                                <div className="flex items-center gap-2">
+                                                    <Input
+                                                        id="radius-input"
+                                                        type="number"
+                                                        value={radiusInput}
+                                                        onChange={handleRadiusChange}
+                                                        className="h-7 w-20 text-[10px] bg-white/50 border-nepal-gold/20 focus-visible:ring-nepal-gold transition-all"
+                                                    />
+                                                    <span className="text-[10px] font-medium opacity-60">m</span>
+                                                </div>
+                                            </div>
+                                            <div className="pt-1 border-t border-black/5">
+                                                <span className="font-mono block italic">Lat: {homeLocation.lat.toFixed(6)}</span>
+                                                <span className="font-mono block italic">Lon: {homeLocation.lng.toFixed(6)}</span>
+                                                <span className="mt-1 flex items-center gap-1 opacity-70"><ExternalLink className="w-3 h-3" /> External OS Nav Ready</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </>
                         )}
                     </Card>
 
