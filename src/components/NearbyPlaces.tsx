@@ -10,6 +10,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Eye, EyeOff } from "lucide-react";
 
 // Fix for default marker icon in Leaflet + Webpack/Vite
 // @ts-ignore
@@ -62,6 +64,7 @@ const NearbyPlaces = () => {
     const [distanceToHome, setDistanceToHome] = useState<number | null>(null);
     const [comfortRadius, setComfortRadius] = useState<number>(3000);
     const [radiusInput, setRadiusInput] = useState<string>("3000");
+    const [showNearby, setShowNearby] = useState<boolean>(true);
 
     useEffect(() => {
         const savedHome = localStorage.getItem('user_home_base');
@@ -76,6 +79,16 @@ const NearbyPlaces = () => {
             setRadiusInput(savedRadius);
         }
     }, []);
+
+    const toggleNearby = (checked: boolean) => {
+        setShowNearby(checked);
+        if (!checked) {
+            setPlaces([]);
+            setActiveCategory(null);
+        } else if (location) {
+            fetchNearbyPlaces(location[0], location[1]);
+        }
+    };
 
     useEffect(() => {
         if (location && homeLocation) {
@@ -138,6 +151,7 @@ const NearbyPlaces = () => {
     };
 
     const fetchNearbyPlaces = async (lat: number, lon: number) => {
+        if (!showNearby) return;
         setLoading(true);
         try {
             const radius = 3000;
@@ -188,9 +202,9 @@ const NearbyPlaces = () => {
         }
     };
 
-    const filteredPlaces = activeCategory
+    const filteredPlaces = (activeCategory && showNearby)
         ? places.filter(p => p.category === activeCategory)
-        : places;
+        : showNearby ? places : [];
 
     return (
         <section className="py-20 px-4 md:px-8 bg-background relative overflow-hidden" id="nearby-places">
@@ -208,14 +222,25 @@ const NearbyPlaces = () => {
                         </p>
                     </div>
 
-                    <Button
-                        onClick={requestLocation}
-                        disabled={loading}
-                        className="bg-nepal-terracotta hover:bg-nepal-terracotta/90 text-white gap-2 h-12 px-6 rounded-full transition-all hover:scale-105 active:scale-95 shadow-lg shadow-nepal-terracotta/20"
-                    >
-                        {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Navigation className="w-5 h-5" />}
-                        {location ? "Refresh Location" : "Find Nearby Places"}
-                    </Button>
+                    <div className="flex flex-col sm:flex-row items-center gap-4">
+                        <div className="flex items-center gap-2 bg-muted/30 px-4 py-2 rounded-full border border-border/50">
+                            {showNearby ? <Eye className="w-4 h-4 text-nepal-stone" /> : <EyeOff className="w-4 h-4 text-muted-foreground" />}
+                            <span className="text-xs font-semibold text-nepal-stone whitespace-nowrap">Nearby Discovery</span>
+                            <Switch
+                                checked={showNearby}
+                                onCheckedChange={toggleNearby}
+                                className="scale-75 data-[state=checked]:bg-nepal-terracotta"
+                            />
+                        </div>
+                        <Button
+                            onClick={requestLocation}
+                            disabled={loading || !showNearby}
+                            className="bg-nepal-terracotta hover:bg-nepal-terracotta/90 text-white gap-2 h-12 px-6 rounded-full transition-all hover:scale-105 active:scale-95 shadow-lg shadow-nepal-terracotta/20 disabled:opacity-50 disabled:hover:scale-100"
+                        >
+                            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Navigation className="w-5 h-5" />}
+                            {location ? "Refresh Location" : "Find Nearby Places"}
+                        </Button>
+                    </div>
                 </div>
 
                 {error && (
