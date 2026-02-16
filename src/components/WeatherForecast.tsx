@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Cloud, CloudRain, Sun, Thermometer, MapPin, Loader2, Navigation, Wind, Droplets, Sparkles, AlertTriangle, X, Search } from "lucide-react";
+import { Cloud, CloudRain, Sun, Thermometer, MapPin, Loader2, Navigation, Wind, Droplets, Sparkles, AlertTriangle, X, Search, LocateFixed } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useWeather } from "@/contexts/WeatherContext";
@@ -12,6 +12,7 @@ interface WeatherData {
     locationName: string;
     windSpeed: number;
     humidity: number;
+    isCurrentLocation: boolean;
 }
 
 interface LocationSuggestion {
@@ -59,7 +60,7 @@ const WeatherForecast = () => {
         return "Adaptable weather ahead. Keep a light jacket handy!";
     };
 
-    const fetchWeather = async (lat: number, lon: number, customLocationName?: string) => {
+    const fetchWeather = async (lat: number, lon: number, customLocationName?: string, iscurrent: boolean = false) => {
         try {
             setLoading(true);
             setError(null);
@@ -90,6 +91,7 @@ const WeatherForecast = () => {
                     locationName: locationName,
                     windSpeed: current.windspeed,
                     humidity: data.hourly?.relativehumidity_2m?.[0] || 60,
+                    isCurrentLocation: iscurrent
                 };
 
                 setWeather(weatherData);
@@ -109,16 +111,16 @@ const WeatherForecast = () => {
         if ("geolocation" in navigator) {
             navigator.geolocation.getCurrentPosition(
                 (position) => {
-                    fetchWeather(position.coords.latitude, position.coords.longitude);
+                    fetchWeather(position.coords.latitude, position.coords.longitude, undefined, true);
                 },
                 (err) => {
                     console.error("Geolocation error:", err);
-                    fetchWeather(27.7172, 85.3240, "Kathmandu"); // Fallback
+                    fetchWeather(27.7172, 85.3240, "Kathmandu", false); // Fallback
                     setError("Location access denied. Showing Kathmandu.");
                 }
             );
         } else {
-            fetchWeather(27.7172, 85.3240, "Kathmandu");
+            fetchWeather(27.7172, 85.3240, "Kathmandu", false);
         }
     };
 
@@ -154,7 +156,7 @@ const WeatherForecast = () => {
 
     const handleSuggestionClick = (suggestion: LocationSuggestion) => {
         const shortName = suggestion.display_name.split(",")[0];
-        fetchWeather(parseFloat(suggestion.lat), parseFloat(suggestion.lon), shortName);
+        fetchWeather(parseFloat(suggestion.lat), parseFloat(suggestion.lon), shortName, false);
     };
 
     // Close suggestions on click outside
@@ -206,40 +208,51 @@ const WeatherForecast = () => {
 
                         <div className="p-6 md:p-8">
                             {/* Search Bar & Suggestions */}
-                            <div ref={wrapperRef} className="relative mb-6 z-30">
-                                <div className="relative">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                    <Input
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        placeholder="Search city (e.g., Pokhara, London)..."
-                                        className="pl-10 rounded-xl bg-secondary/80 border-transparent focus:border-nepal-forest/50"
-                                    />
-                                    {isSearching && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />}
-                                </div>
+                            <div className="flex gap-2 mb-6">
+                                <div ref={wrapperRef} className="relative z-30 flex-1">
+                                    <div className="relative">
+                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                        <Input
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            placeholder="Search city (e.g., Pokhara, London)..."
+                                            className="pl-10 rounded-xl bg-secondary/80 border-transparent focus:border-nepal-forest/50"
+                                        />
+                                        {isSearching && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />}
+                                    </div>
 
-                                {/* Auto-complete Dropdown */}
-                                <AnimatePresence>
-                                    {showSuggestions && suggestions.length > 0 && (
-                                        <motion.div
-                                            initial={{ opacity: 0, y: -10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0, y: -10 }}
-                                            className="absolute top-full left-0 right-0 mt-2 bg-background border border-border rounded-xl shadow-lg max-h-60 overflow-y-auto z-50 overflow-hidden"
-                                        >
-                                            {suggestions.map((suggestion, index) => (
-                                                <button
-                                                    key={index}
-                                                    onClick={() => handleSuggestionClick(suggestion)}
-                                                    className="w-full text-left px-4 py-3 hover:bg-secondary/50 transition-colors text-sm border-b last:border-0 border-border/50 flex items-center gap-2"
-                                                >
-                                                    <MapPin className="h-3 w-3 text-muted-foreground" />
-                                                    <span className="truncate">{suggestion.display_name}</span>
-                                                </button>
-                                            ))}
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
+                                    {/* Auto-complete Dropdown */}
+                                    <AnimatePresence>
+                                        {showSuggestions && suggestions.length > 0 && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: -10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, y: -10 }}
+                                                className="absolute top-full left-0 right-0 mt-2 bg-background border border-border rounded-xl shadow-lg max-h-60 overflow-y-auto z-50 overflow-hidden"
+                                            >
+                                                {suggestions.map((suggestion, index) => (
+                                                    <button
+                                                        key={index}
+                                                        onClick={() => handleSuggestionClick(suggestion)}
+                                                        className="w-full text-left px-4 py-3 hover:bg-secondary/50 transition-colors text-sm border-b last:border-0 border-border/50 flex items-center gap-2"
+                                                    >
+                                                        <MapPin className="h-3 w-3 text-muted-foreground" />
+                                                        <span className="truncate">{suggestion.display_name}</span>
+                                                    </button>
+                                                ))}
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={getLocation}
+                                    title="My Location"
+                                    className="shrink-0 rounded-xl bg-secondary/80 border-transparent hover:bg-secondary hover:text-nepal-forest"
+                                >
+                                    <LocateFixed className="h-5 w-5" />
+                                </Button>
                             </div>
 
                             {/* Content */}
@@ -252,11 +265,18 @@ const WeatherForecast = () => {
                                 ) : weather ? (
                                     <div className="space-y-6">
                                         <div className="text-center">
-                                            <h2 className="text-2xl font-bold flex items-center justify-center gap-2">
-                                                <MapPin className="h-5 w-5 text-nepal-forest" />
-                                                {weather.locationName}
+                                            <h2 className="text-2xl font-bold flex flex-col items-center justify-center gap-1">
+                                                <div className="flex items-center gap-2">
+                                                    <MapPin className="h-5 w-5 text-nepal-forest" />
+                                                    {weather.locationName}
+                                                </div>
+                                                {weather.isCurrentLocation && (
+                                                    <span className="text-xs font-normal text-muted-foreground/80 bg-secondary/50 px-2 py-0.5 rounded-full">
+                                                        Your Location
+                                                    </span>
+                                                )}
                                             </h2>
-                                            <p className="text-muted-foreground text-sm">{weather.condition}</p>
+                                            <p className="text-muted-foreground text-sm mt-1">{weather.condition}</p>
                                         </div>
 
                                         <div className="flex items-center justify-center gap-6 py-4">
