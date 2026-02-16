@@ -14,6 +14,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import CategoryPage from "./pages/CategoryPage";
 import NotFound from "./pages/NotFound";
+import AutoTranslator from "./components/AutoTranslator";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +22,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <LanguageProvider>
+        <AutoTranslator />
         <TooltipProvider>
           <Toaster />
           <Sonner />
