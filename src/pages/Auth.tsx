@@ -8,7 +8,6 @@ import { Eye, EyeOff, Mail, Lock, User, Mountain, ArrowLeft, CheckCircle } from 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -35,7 +34,6 @@ type LoginFormData = z.infer<typeof loginSchema>;
 type SignupFormData = z.infer<typeof signupSchema>;
 
 const Auth = () => {
-  const [role, setRole] = useState<'Tourist' | 'Guide'>('Tourist');
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -80,7 +78,7 @@ const Auth = () => {
   const onSignupSubmit = async (data: SignupFormData) => {
     setIsLoading(true);
     try {
-      const { error } = await signUp(data.email, data.password, role, data.fullName);
+      const { error } = await signUp(data.email, data.password, data.fullName);
       if (error) {
         toast({
           variant: 'destructive',
@@ -199,15 +197,6 @@ const Auth = () => {
           </div>
 
 
-          {/* Role Selection Tabs */}
-          <Tabs defaultValue="Tourist" onValueChange={(val) => setRole(val as 'Tourist' | 'Guide')} className="w-full mb-6">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="Tourist">Tourist</TabsTrigger>
-              <TabsTrigger value="Guide">Guide</TabsTrigger>
-            </TabsList>
-            <TabsContent value="Tourist" className="mt-0"></TabsContent>
-            <TabsContent value="Guide" className="mt-0"></TabsContent>
-          </Tabs>
 
           {/* Toggle buttons */}
           <div className="flex bg-muted rounded-xl p-1 mb-8">
@@ -215,21 +204,21 @@ const Auth = () => {
               type="button"
               onClick={() => setIsLogin(true)}
               className={`flex-1 py-3 rounded-lg text-sm font-medium transition-all ${isLogin
-                  ? 'bg-background shadow-sm text-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
+                ? 'bg-background shadow-sm text-foreground'
+                : 'text-muted-foreground hover:text-foreground'
                 }`}
             >
-              {role} Sign In
+              Sign In
             </button>
             <button
               type="button"
               onClick={() => setIsLogin(false)}
               className={`flex-1 py-3 rounded-lg text-sm font-medium transition-all ${!isLogin
-                  ? 'bg-background shadow-sm text-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
+                ? 'bg-background shadow-sm text-foreground'
+                : 'text-muted-foreground hover:text-foreground'
                 }`}
             >
-              {role} Sign Up
+              Sign Up
             </button>
           </div>
 

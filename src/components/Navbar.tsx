@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, Mountain, User, LogIn, Shield, Bookmark } from "lucide-react";
+import { Menu, X, Mountain, User, LogIn, Shield, Bookmark, Newspaper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import LanguageToggle from "./LanguageToggle";
@@ -95,6 +95,16 @@ const Navbar = () => {
           >
             Weather
           </button>
+
+          {/* News Quick Link */}
+          <Link
+            to="/news"
+            className={`font-medium transition-all duration-300 hover:text-accent cursor-pointer flex items-center gap-1 ${isScrolled ? "text-foreground" : "text-primary-foreground"
+              }`}
+          >
+            <Newspaper className="w-3.5 h-3.5" />
+            News
+          </Link>
 
           {/* Auth Button */}
           {!loading && (
@@ -194,6 +204,15 @@ const Navbar = () => {
             >
               Weather Check
             </button>
+
+            <Link
+              to="/news"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="text-foreground font-medium py-2 hover:text-accent transition-colors flex items-center gap-2"
+            >
+              <Newspaper className="w-4 h-4" />
+              Travel News
+            </Link>
 
             {!loading && (
               <div className="flex flex-col gap-4 mt-2">

@@ -24,6 +24,16 @@ GoNepal features a first-of-its-kind **Dynamic Translation Layer** that allows t
 
 ## 📍 Core Capabilities
 
+### 📰 Live Travel News Feed
+A dedicated **Nepal Travel News** page powered by real-time RSS feeds.
+- **Live Source**: Fetches from [OnlineKhabar English](https://english.onlinekhabar.com) with automatic fallback to the Nepali edition.
+- **Emergency Alerts**: Articles mentioning floods, landslides, or earthquakes are highlighted with a pulsing red emergency badge.
+- **AI News Buddy**: Each article has a one-click **"AI Summary"** button that sends the article to a tourist-focused AI assistant, giving you a plain-English TL;DR and travel-impact analysis.
+- **Verified Source**: Every article carries a source verification tag.
+
+### 🔄 Smooth Page Transitions
+All page navigations feature a fluid **fade + slide animation** powered by Framer Motion, giving the app a premium, native-app feel.
+
 ### 🗺️ Live Exploration & "Take Me Back" Safe-Guard
 Designed specifically for the wandering traveler, our map integration is your digital breadcrumb trail.
 - **Nearby Essentials Discovery**: Queries the Overpass API in real-time to find Hospitals, Hotels, Restaurants, Parks, and Malls within a customized 3km radius.

@@ -8,18 +8,17 @@ import { toast } from "sonner";
 
 export default function TestAuth() {
     const { signUp } = useAuth();
-    const [guideEmail, setGuideEmail] = useState("");
     const [touristEmail, setTouristEmail] = useState("");
     const [loading, setLoading] = useState(false);
 
-    const handleCreateUser = async (role: "Guide" | "Tourist", email: string) => {
+    const handleCreateUser = async (email: string) => {
         if (!email) {
             toast.error("Please enter an email");
             return;
         }
         setLoading(true);
         try {
-            const { error } = await signUp(email, "TestPass123!", role, `Test ${role}`);
+            const { error } = await signUp(email, "TestPass123!", "Test Tourist");
             if (error) {
                 toast.error(error.message);
             } else {
@@ -39,22 +38,7 @@ export default function TestAuth() {
                     <CardTitle>Hackathon User Setup</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                    <div className="space-y-2">
-                        <h3 className="text-lg font-medium">Create Guide</h3>
-                        <div className="flex gap-2">
-                            <Input
-                                placeholder="guide@example.com"
-                                value={guideEmail}
-                                onChange={(e) => setGuideEmail(e.target.value)}
-                            />
-                            <Button
-                                onClick={() => handleCreateUser("Guide", guideEmail)}
-                                disabled={loading}
-                            >
-                                {loading ? "Creating..." : "Create Guide"}
-                            </Button>
-                        </div>
-                    </div>
+
 
                     <div className="space-y-2">
                         <h3 className="text-lg font-medium">Create Tourist</h3>
@@ -65,7 +49,7 @@ export default function TestAuth() {
                                 onChange={(e) => setTouristEmail(e.target.value)}
                             />
                             <Button
-                                onClick={() => handleCreateUser("Tourist", touristEmail)}
+                                onClick={() => handleCreateUser(touristEmail)}
                                 disabled={loading}
                             >
                                 {loading ? "Creating..." : "Create Tourist"}

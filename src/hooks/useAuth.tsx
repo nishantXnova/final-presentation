@@ -6,7 +6,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string, role: 'Tourist' | 'Guide', fullName?: string) => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, fullName?: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   isAdmin: boolean;
@@ -66,7 +66,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  const signUp = async (email: string, password: string, role: 'Tourist' | 'Guide', fullName?: string) => {
+  const signUp = async (email: string, password: string, fullName?: string) => {
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -75,25 +75,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           emailRedirectTo: window.location.origin,
           data: {
             full_name: fullName || '',
-            role: role,
+            role: 'Tourist',
           },
         },
       });
 
       if (!error && data.user) {
         // Manually insert profile to ensure role is saved
-        // Using any cast for role since types.ts might not be updated yet
         const { error: profileError } = await supabase.from('profiles').insert({
           id: data.user.id,
           full_name: fullName,
-          // @ts-ignore - role column exists in DB but might be missing in types
-          role: role,
+          role: 'Tourist',
           email: email
         });
 
         if (profileError) {
           console.error('Error creating profile:', profileError);
-          // We don't return this error as auth was successful, but ideally we should handle this
         }
       }
 
