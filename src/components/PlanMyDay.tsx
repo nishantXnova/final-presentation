@@ -1,19 +1,153 @@
-// ... existing imports ...
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     X, MapPin, Sun, Cloud, CloudRain, Loader2, Sparkles,
     Navigation, Clock, ExternalLink, Route, Wind, Droplets,
     Thermometer, ChevronRight, Calendar, Coffee, Camera,
-    Utensils, Landmark, TreePine, Mountain, Star
+    Utensils, Landmark, TreePine, Mountain, Star, RefreshCw
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-// ... constants and interfaces (unchanged) ...
-// (Omitting repetitive constants for space, assuming they are kept as is)
+interface PlanMyDayProps {
+    isOpen: boolean;
+    onClose: () => void;
+}
+
+interface WeatherData {
+    temperature: number;
+    condition: string;
+    conditionCode: number;
+    locationName: string;
+    windSpeed: number;
+    humidity: number;
+}
+
+interface TouristSpot {
+    id: string;
+    name: string;
+    description: string;
+    type: 'nature' | 'culture' | 'adventure' | 'food';
+    tip: string;
+    duration: string;
+    lat: number;
+    lng: number;
+}
+
+const NEPAL_SPOTS: TouristSpot[] = [
+    { id: '1', name: 'Swayambhunath Stupa', description: 'The famous Monkey Temple with panoramic Kathmandu views.', type: 'culture', tip: 'Visit early morning to see locals performing rituals.', duration: '1.5h', lat: 27.7149, lng: 85.2904 },
+    { id: '2', name: 'Patan Durbar Square', description: 'Marvel at the ancient Newari architecture and stone carvings.', type: 'culture', tip: 'Check out the Golden Temple tucked in a side alley.', duration: '2h', lat: 27.6744, lng: 85.3253 },
+    { id: '3', name: 'Boudhanath Stupa', description: 'One of the largest spherical stupas in the world.', type: 'culture', tip: 'Circircle the stupa clockwise (Kora) with the pilgrims.', duration: '1h', lat: 27.7215, lng: 85.3620 },
+    { id: '4', name: 'Garden of Dreams', description: 'A neo-classical historical garden in the heart of Thamel.', type: 'nature', tip: 'Perfect spot for a quiet lunch away from Thamel noise.', duration: '1.5h', lat: 27.7142, lng: 85.3145 },
+    { id: '5', name: 'Shivapuri Nagarjun National Park', description: 'Best for day hiking and bird watching near the city.', type: 'adventure', tip: 'Hire a guide for the Nagi Gumba trail.', duration: '4h', lat: 27.7983, lng: 85.3771 },
+    { id: '6', name: 'Chandragiri Hills', description: 'Take a cable car ride for the best Everest range views.', type: 'adventure', tip: 'Go on a clear winter day for 180-degree mountain views.', duration: '3h', lat: 27.6695, lng: 85.2104 },
+    { id: '7', name: 'Narayanhiti Palace Museum', description: 'Former royal residence turned into a fascinating museum.', type: 'culture', tip: 'Photography is restricted inside; allow time for security.', duration: '2h', lat: 27.7150, lng: 85.3180 },
+    { id: '8', name: 'Nagarkot Viewpoint', description: 'Hill station famous for sunrise views of the Himalayas.', type: 'nature', tip: "Stay overnight to catch the sunrise; it's worth it.", duration: '5h', lat: 27.7183, lng: 85.5214 },
+];
+
+const TYPE_COLORS = {
+    nature: 'bg-emerald-50 text-emerald-700 border-emerald-100',
+    culture: 'bg-amber-50 text-amber-700 border-amber-100',
+    adventure: 'bg-blue-50 text-blue-700 border-blue-100',
+    food: 'bg-rose-50 text-rose-700 border-rose-100',
+};
+
+const TYPE_ICONS = {
+    nature: <TreePine className="w-3.5 h-3.5" />,
+    culture: <Landmark className="w-3.5 h-3.5" />,
+    adventure: <Mountain className="w-3.5 h-3.5" />,
+    food: <Utensils className="w-3.5 h-3.5" />,
+};
 
 const PlanMyDay = ({ isOpen, onClose }: PlanMyDayProps) => {
-    // ... states (unchanged) ...
+    const [step, setStep] = useState<'locating' | 'weather' | 'done'>('locating');
+    const [weather, setWeather] = useState<WeatherData | null>(null);
+    const [stops, setStops] = useState<TouristSpot[]>([]);
+    const [mapsUrl, setMapsUrl] = useState('');
+    const [totalDuration, setTotalDuration] = useState(0);
+
+    const startFlow = async () => {
+        setStep('locating');
+
+        // 1. Get Location
+        navigator.geolocation.getCurrentPosition(
+            async (pos) => {
+                const { latitude, longitude } = pos.coords;
+                setStep('weather');
+
+                try {
+                    // 2. Fetch Weather
+                    const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m`);
+                    const wData = await wRes.json();
+
+                    // Geocoding (Nomination)
+                    const gRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+                    const gData = await gRes.json();
+
+                    const current = wData.current;
+                    const weatherObj: WeatherData = {
+                        temperature: Math.round(current.temperature_2m),
+                        condition: getWeatherLabel(current.weather_code),
+                        conditionCode: current.weather_code,
+                        locationName: gData.address.city || gData.address.town || 'Kathmandu',
+                        windSpeed: current.wind_speed_10m,
+                        humidity: current.relative_humidity_2m
+                    };
+                    setWeather(weatherObj);
+
+                    // 3. Generate Itinerary
+                    const selected = NEPAL_SPOTS
+                        .sort(() => 0.5 - Math.random())
+                        .slice(0, 4);
+
+                    setStops(selected);
+
+                    // 4. Build Maps URL
+                    const origin = `${latitude},${longitude}`;
+                    const destination = `${selected[selected.length - 1].lat},${selected[selected.length - 1].lng}`;
+                    const waypoints = selected.slice(0, -1).map(s => `${s.lat},${s.lng}`).join('|');
+                    const url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&waypoints=${waypoints}&travelmode=walking`;
+                    setMapsUrl(url);
+
+                    setTotalDuration(240); // Mock total 4h
+                    setStep('done');
+                } catch (err) {
+                    console.error("PlanMyDay Error:", err);
+                    onClose();
+                }
+            },
+            () => {
+                // Fallback to Kathmandu if geolocation denied
+                setStep('done');
+                onClose();
+            }
+        );
+    };
+
+    useEffect(() => {
+        if (isOpen) {
+            startFlow();
+        }
+    }, [isOpen]);
+
+    const getWeatherLabel = (code: number) => {
+        if (code === 0) return 'Clear Skies';
+        if (code < 3) return 'Partly Cloudy';
+        if (code < 50) return 'Overcast';
+        if (code < 70) return 'Rainy';
+        return 'Stormy';
+    };
+
+    const getWeatherIcon = (code: number) => {
+        if (code === 0) return <Sun className="w-8 h-8 text-yellow-500" />;
+        if (code < 3) return <Cloud className="w-8 h-8 text-gray-400" />;
+        return <CloudRain className="w-8 h-8 text-blue-500" />;
+    };
+
+    const getContextualOpening = (w: WeatherData) => {
+        if (w.conditionCode > 50) return "It's a bit drizzly, so we've found some amazing indoor heritage spots for you.";
+        if (w.temperature > 25) return "Warm sun calls for gardens and hill views. Stay hydrated!";
+        return "Crisp mountain air! Perfect for walking through the historic squares.";
+    };
 
     return (
         <AnimatePresence>
@@ -74,7 +208,7 @@ const PlanMyDay = ({ isOpen, onClose }: PlanMyDayProps) => {
 
                             {/* Scrollable Content */}
                             <div className="h-full overflow-y-auto custom-scrollbar p-6">
-                                {(step === "locating" || step === "weather") && (
+                                {(step === 'locating' || step === 'weather') && (
                                     <div className="flex flex-col items-center justify-center py-20 px-6 gap-6">
                                         <div className="relative">
                                             <motion.div
@@ -87,20 +221,20 @@ const PlanMyDay = ({ isOpen, onClose }: PlanMyDayProps) => {
                                                     animate={{ scale: [1, 1.2, 1] }}
                                                     transition={{ duration: 1, repeat: Infinity }}
                                                 >
-                                                    {step === "locating" ? <MapPin className="w-8 h-8 text-[#E41B17]" /> : <Sun className="w-8 h-8 text-yellow-500" />}
+                                                    {step === 'locating' ? <MapPin className="w-8 h-8 text-[#E41B17]" /> : <Sun className="w-8 h-8 text-yellow-500" />}
                                                 </motion.div>
                                             </div>
                                         </div>
                                         <div className="text-center">
                                             <p className="text-gray-900 font-bold text-lg mb-1">
-                                                {step === "locating" ? "Locating your adventure…" : "Consulting the skies…"}
+                                                {step === 'locating' ? "Locating your adventure…" : "Consulting the skies…"}
                                             </p>
                                             <p className="text-gray-400 text-sm font-medium">Almost ready to show you the best of Nepal</p>
                                         </div>
                                     </div>
                                 )}
 
-                                {step === "done" && weather && (
+                                {step === 'done' && weather && (
                                     <div className="space-y-8 pb-10">
                                         {/* Weather Summary Card */}
                                         <motion.div
@@ -117,7 +251,7 @@ const PlanMyDay = ({ isOpen, onClose }: PlanMyDayProps) => {
                                                     <motion.div
                                                         animate={{ y: [0, -5, 0] }}
                                                         transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                                                        className="p-4 bg-white rounded-2xl shadow-soft"
+                                                        className="p-4 bg-white rounded-2xl shadow-sm"
                                                     >
                                                         {getWeatherIcon(weather.conditionCode)}
                                                     </motion.div>
@@ -167,7 +301,7 @@ const PlanMyDay = ({ isOpen, onClose }: PlanMyDayProps) => {
                                             </h4>
                                             <div className="flex items-center gap-1.5 py-1 px-3 bg-gray-100 rounded-full text-[10px] font-bold text-gray-500">
                                                 <Clock className="w-3.5 h-3.5" />
-                                                ~{Math.floor(totalDuration / 60)}h {totalDuration % 60}m
+                                                ~4h
                                             </div>
                                         </div>
 
@@ -247,9 +381,9 @@ const PlanMyDay = ({ isOpen, onClose }: PlanMyDayProps) => {
                                                         transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                                                     />
                                                     <div className="relative flex items-center justify-center gap-3 font-bold text-lg">
-                                                        <MapPin className="w-6 h-6 group-hover:animate-bounce" />
-                                                        Start Journey (Google Maps)
-                                                        <ExternalLink className="w-4 h-4 opacity-50" />
+                                                        <MapPin className="w-6 h-6 group-hover:animate-bounce text-white" />
+                                                        <span className="text-white">Start Journey (Google Maps)</span>
+                                                        <ExternalLink className="w-4 h-4 text-white opacity-50" />
                                                     </div>
                                                 </Button>
                                             </a>
@@ -276,6 +410,5 @@ const PlanMyDay = ({ isOpen, onClose }: PlanMyDayProps) => {
         </AnimatePresence>
     );
 };
-
 
 export default PlanMyDay;
