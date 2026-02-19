@@ -8,6 +8,8 @@ export interface NewsItem {
     lastUpdated: string;
 }
 
+const NEPAL_FALLBACK_IMAGE = "https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=1000&auto=format&fit=crop";
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mapItems = (items: any[], sourceName: string): NewsItem[] => {
     const emergencyKeywords = ['flood', 'landslide', 'earthquake', 'avalanche', 'emergency', 'disaster', 'alert'];
@@ -18,7 +20,7 @@ const mapItems = (items: any[], sourceName: string): NewsItem[] => {
             title: item.title,
             link: item.link,
             pubDate: item.pubDate || new Date().toISOString(),
-            thumbnail: item.thumbnail || item.enclosure?.link || '',
+            thumbnail: item.thumbnail || item.enclosure?.link || NEPAL_FALLBACK_IMAGE,
             source: `Verified Source: ${sourceName}`,
             isEmergency,
             lastUpdated: new Date().toLocaleTimeString(),

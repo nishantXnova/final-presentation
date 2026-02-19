@@ -46,7 +46,9 @@ const NewsCard = ({ item, onSummarize }: { item: NewsItem; onSummarize: (item: N
                         src={item.thumbnail}
                         alt={item.title}
                         className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                        onError={(e) => { (e.target as HTMLImageElement).parentElement!.style.display = 'none'; }}
+                        onError={(e) => {
+                            (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=1000&auto=format&fit=crop";
+                        }}
                     />
                     {item.isEmergency && (
                         <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-full animate-pulse">

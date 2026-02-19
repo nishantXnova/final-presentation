@@ -23,9 +23,10 @@ Deno.serve(async (req) => {
   try {
     const { message, history = [] } = await req.json() as ChatbotRequest;
 
-    const messages = {
-      role: 'system',
-      content: `You are a friendly and knowledgeable Nepal travel assistant. You help travelers with:
+    const messages = [
+      {
+        role: 'system',
+        content: `You are a friendly and knowledgeable Nepal travel assistant. You help travelers with:
 - Information about destinations in Nepal (Kathmandu, Pokhara, Everest, Annapurna, etc.)
 - Trekking advice, routes, and difficulty levels
 - Visa and permit requirements

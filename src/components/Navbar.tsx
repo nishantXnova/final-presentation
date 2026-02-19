@@ -63,7 +63,7 @@ const Navbar = () => {
             }`} />
           <span className={`font-display text-2xl font-bold transition-colors duration-300 ${isScrolled ? "text-foreground" : "text-primary-foreground"
             }`}>
-            GoNepal <span className="text-[10px] opacity-50 ml-1">v2.2</span>
+            GoNepal <span className="text-[10px] opacity-50 ml-1">v2.3</span>
           </span>
         </Link>
 
