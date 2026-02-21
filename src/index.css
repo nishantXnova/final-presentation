@@ -164,7 +164,7 @@
   }
 
   .glow-hover {
-    @apply transition-all duration-500 hover:shadow-[0_0_20px_rgba(25, 85, 55, 0.3)] hover:scale-105;
+    @apply transition-all duration-500 hover:shadow-[0_0_20px_rgba(25,85,55,0.3)] hover:scale-105;
   }
 
   .text-glow {
