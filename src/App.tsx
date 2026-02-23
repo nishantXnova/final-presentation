@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -5,65 +6,86 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { LanguageProvider } from "@/contexts/LanguageContext";
-import Index from "./pages/Index";
-import DestinationDetail from "./pages/DestinationDetail";
-import Auth from "./pages/Auth";
-import Profile from "./pages/Profile";
-import SavedPlaces from "./pages/SavedPlaces";
-import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
-import CategoryPage from "./pages/CategoryPage";
-import NotFound from "./pages/NotFound";
-import NewsPage from "./pages/NewsPage";
-import DigitalTouristID from "./pages/DigitalTouristID";
 import AutoTranslator from "./components/AutoTranslator";
 import WeatherForecast from "./components/WeatherForecast";
 import TestAuth from "./components/TestAuth";
 import { WeatherProvider } from "./contexts/WeatherContext";
 import PageTransition from "./components/PageTransition";
+import { Loader2 } from "lucide-react";
 
-const queryClient = new QueryClient();
+// Lazy load all pages for code splitting
+const Index = lazy(() => import("./pages/Index"));
+const DestinationDetail = lazy(() => import("./pages/DestinationDetail"));
+const Auth = lazy(() => import("./pages/Auth"));
+const Profile = lazy(() => import("./pages/Profile"));
+const SavedPlaces = lazy(() => import("./pages/SavedPlaces"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const CategoryPage = lazy(() => import("./pages/CategoryPage"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const NewsPage = lazy(() => import("./pages/NewsPage"));
+const DigitalTouristID = lazy(() => import("./pages/DigitalTouristID"));
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      gcTime: 1000 * 60 * 30, // 30 minutes (formerly cacheTime)
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
+
+// Loading component for suspense
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-[50vh]">
+    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+  </div>
+);
 
 // Inner component so useLocation works inside BrowserRouter
 const AnimatedRoutes = () => {
   const location = useLocation();
   return (
     <PageTransition>
-      <Routes location={location}>
-        <Route path="/" element={<Index />} />
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/destination/:id" element={<DestinationDetail />} />
-        <Route path="/category/:slug" element={<CategoryPage />} />
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/saved-places"
-          element={
-            <ProtectedRoute>
-              <SavedPlaces />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute requireAdmin>
-              <AdminDashboard />
-            </ProtectedRoute>
-          }
-        />
-        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-        <Route path="/test-auth" element={<TestAuth />} />
-        <Route path="/news" element={<NewsPage />} />
-        <Route path="/tourist-id" element={<DigitalTouristID />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      <Suspense fallback={<PageLoader />}>
+        <Routes location={location}>
+          <Route path="/" element={<Index />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/destination/:id" element={<DestinationDetail />} />
+          <Route path="/category/:slug" element={<CategoryPage />} />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/saved-places"
+            element={
+              <ProtectedRoute>
+                <SavedPlaces />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute requireAdmin>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/test-auth" element={<TestAuth />} />
+          <Route path="/news" element={<NewsPage />} />
+          <Route path="/tourist-id" element={<DigitalTouristID />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
     </PageTransition>
   );
 };

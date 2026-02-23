@@ -24,6 +24,19 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="canonical" href="https://go-nepal.vercel.app" />
+
+    <!-- Performance optimizations -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://images.unsplash.com" />
+    <link rel="preload" href="/src/main.tsx" as="script" />
+    
+    <!-- Critical CSS hint -->
+    <style>
+      /* Instant first paint */
+      body { background: #ffffff; }
+      @media (prefers-color-scheme: dark) { body { background: #0a0a0a; } }
+    </style>
   </head>
 
   <body>

@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import StatsBar from "@/components/StatsBar";
@@ -11,9 +12,16 @@ import TravelInfo from "@/components/TravelInfo";
 import CurrencyConverter from "@/components/CurrencyConverter";
 import LanguageTranslator from "@/components/LanguageTranslator";
 import Footer from "@/components/Footer";
-import AIChatbot from "@/components/AIChatbot";
 import NearbyPlaces from "@/components/NearbyPlaces";
-import GuidedTour from "@/components/GuidedTour";
+import { Loader2 } from "lucide-react";
+
+// Lazy load heavy components
+const AIChatbot = lazy(() => import("@/components/AIChatbot"));
+
+// Skeleton for chatbot loading
+const ChatbotSkeleton = () => (
+  <div className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-primary/10 animate-pulse" />
+);
 
 const Index = () => {
   return (
@@ -35,8 +43,9 @@ const Index = () => {
       <TravelInfo />
       <NearbyPlaces />
       <Footer />
-      <AIChatbot />
-      <GuidedTour />
+      <Suspense fallback={<ChatbotSkeleton />}>
+        <AIChatbot />
+      </Suspense>
     </div>
   );
 };
