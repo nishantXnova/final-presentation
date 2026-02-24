@@ -1,0 +1,4 @@
+project_id = "lppdmirduhvoubjlbxik"
+
+[functions.currency-converter]
+verify_jwt = false
