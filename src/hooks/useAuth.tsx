@@ -23,47 +23,56 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     let isMounted = true;
 
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (!isMounted) return;
+    // Set up auth state listener FIRST - wrapped in try-catch to prevent crashes
+    try {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        async (event, session) => {
+          if (!isMounted) return;
 
-        setSession(session);
-        setUser(session?.user ?? null);
+          setSession(session);
+          setUser(session?.user ?? null);
 
-        if (session?.user) {
-          // Use setTimeout to avoid Supabase auth deadlock
-          setTimeout(async () => {
-            if (!isMounted) return;
-            try {
-              const { data } = await supabase.rpc('is_admin', { _user_id: session.user.id });
-              if (isMounted) setIsAdmin(!!data);
-            } catch {
-              if (isMounted) setIsAdmin(false);
-            }
-            if (isMounted) setLoading(false);
-          }, 0);
-        } else {
-          setIsAdmin(false);
-          setLoading(false);
+          if (session?.user) {
+            // Use setTimeout to avoid Supabase auth deadlock
+            setTimeout(async () => {
+              if (!isMounted) return;
+              try {
+                const { data } = await supabase.rpc('is_admin', { _user_id: session.user.id });
+                if (isMounted) setIsAdmin(!!data);
+              } catch {
+                if (isMounted) setIsAdmin(false);
+              }
+              if (isMounted) setLoading(false);
+            }, 0);
+          } else {
+            setIsAdmin(false);
+            setLoading(false);
+          }
         }
-      }
-    );
+      );
 
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!isMounted) return;
-      if (session) {
-        setSession(session);
-        setUser(session.user);
-      }
-      // Don't set loading false here - let onAuthStateChange handle it
-    });
+      // THEN check for existing session
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (!isMounted) return;
+        if (session) {
+          setSession(session);
+          setUser(session.user);
+        }
+        // Don't set loading false here - let onAuthStateChange handle it
+      }).catch(() => {
+        // Handle session fetch error silently
+        if (isMounted) setLoading(false);
+      });
 
-    return () => {
-      isMounted = false;
-      subscription.unsubscribe();
-    };
+      return () => {
+        isMounted = false;
+        subscription.unsubscribe();
+      };
+    } catch (error) {
+      // If Supabase fails (e.g., rate limit), still allow app to load
+      console.warn('Auth initialization failed:', error);
+      if (isMounted) setLoading(false);
+    }
   }, []);
 
   const signUp = async (email: string, password: string, fullName?: string) => {
