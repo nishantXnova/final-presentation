@@ -72,7 +72,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         email,
         password,
         options: {
-          // Use explicit redirect URL for both local and production
           emailRedirectTo: window.location.origin === 'http://localhost:8080' 
             ? 'http://localhost:8080/auth'
             : 'https://go-nepal.vercel.app/auth',
@@ -85,19 +84,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       console.log('Signup response:', { data, error });
 
-      // Check if email confirmation is required
-      if (data.user && !data.session) {
-        console.log('Email confirmation required - confirmation email should be sent');
+      // Check for rate limit error - if rate limited, create profile anyway
+      if (error?.message?.toLowerCase().includes('rate limit')) {
+        console.log('Rate limited - creating profile anyway');
+        if (data.user) {
+          try {
+            await supabase.from('profiles').upsert({
+              id: data.user.id,
+              full_name: fullName,
+              role: 'Tourist',
+              email: email
+            }, { onConflict: 'id' });
+          } catch (profileError) {
+            console.error('Profile creation error:', profileError);
+          }
+        }
+        return { error: null }; // Return success to allow user to continue
       }
 
       if (!error && data.user) {
-        // Manually insert profile to ensure role is saved
-        const { error: profileError } = await supabase.from('profiles').insert({
+        const { error: profileError } = await supabase.from('profiles').upsert({
           id: data.user.id,
           full_name: fullName,
           role: 'Tourist',
           email: email
-        });
+        }, { onConflict: 'id' });
 
         if (profileError) {
           console.error('Error creating profile:', profileError);
