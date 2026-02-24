@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Eye, EyeOff, Mail, Lock, User, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Loader2, CheckCircle, ArrowLeft } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,9 +28,6 @@ const signupSchema = z.object({
     .regex(/[a-z]/, { message: 'Password must contain a lowercase letter' })
     .regex(/[0-9]/, { message: 'Password must contain a number' }),
   confirmPassword: z.string(),
-  tos: z.boolean().refine((val) => val === true, {
-    message: 'You must agree to the Terms of Service',
-  }),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ['confirmPassword'],
@@ -149,7 +146,7 @@ const Auth = () => {
 
   const signupForm = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
-    defaultValues: { fullName: '', email: '', password: '', confirmPassword: '', tos: false },
+    defaultValues: { fullName: '', email: '', password: '', confirmPassword: '' },
   });
 
   const onLoginSubmit = async (data: LoginFormData) => {
@@ -552,33 +549,6 @@ const Auth = () => {
                 <p className="text-xs text-muted-foreground">
                   Password must be at least 8 characters with uppercase, lowercase, and a number.
                 </p>
-
-                <FormField
-                  control={signupForm.control}
-                  name="tos"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md p-4 border">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel className="text-sm font-normal">
-                          I agree to the{' '}
-                          <a href="#" className="text-primary hover:underline">
-                            Terms of Service
-                          </a>{' '}
-                          and{' '}
-                          <a href="#" className="text-primary hover:underline">
-                            Privacy Policy
-                          </a>
-                        </FormLabel>
-                      </div>
-                    </FormItem>
-                  )}
-                />
 
                 <Button type="submit" className="w-full btn-primary" disabled={isLoading}>
                   {isLoading ? 'Creating account...' : 'Create Account'}
