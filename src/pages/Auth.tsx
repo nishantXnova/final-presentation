@@ -4,7 +4,8 @@ import { motion } from 'framer-motion';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Eye, EyeOff, Mail, Lock, User, ArrowLeft, CheckCircle, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Loader2 } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -27,6 +28,9 @@ const signupSchema = z.object({
     .regex(/[a-z]/, { message: 'Password must contain a lowercase letter' })
     .regex(/[0-9]/, { message: 'Password must contain a number' }),
   confirmPassword: z.string(),
+  tos: z.boolean().refine((val) => val === true, {
+    message: 'You must agree to the Terms of Service',
+  }),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ['confirmPassword'],
@@ -40,7 +44,6 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [emailSent, setEmailSent] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
   const [confirmationStatus, setConfirmationStatus] = useState<'success' | 'error' | null>(null);
   const navigate = useNavigate();
@@ -146,7 +149,7 @@ const Auth = () => {
 
   const signupForm = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
-    defaultValues: { fullName: '', email: '', password: '', confirmPassword: '' },
+    defaultValues: { fullName: '', email: '', password: '', confirmPassword: '', tos: false },
   });
 
   const onLoginSubmit = async (data: LoginFormData) => {
@@ -182,50 +185,12 @@ const Auth = () => {
           description: error.message,
         });
       } else {
-        setEmailSent(true);
+        navigate(`/auth/success?email=${encodeURIComponent(data.email)}`);
       }
     } finally {
       setIsLoading(false);
     }
   };
-
-  if (emailSent) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-secondary/30 to-background p-4">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="w-full max-w-md"
-        >
-          <div className="glass-effect rounded-2xl p-8 text-center shadow-elevated">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: 'spring', delay: 0.2 }}
-              className="w-20 h-20 bg-accent/20 rounded-full flex items-center justify-center mx-auto mb-6"
-            >
-              <CheckCircle className="w-10 h-10 text-accent" />
-            </motion.div>
-            <h2 className="heading-section text-2xl mb-4">Check Your Email</h2>
-            <p className="text-muted-foreground mb-6">
-              We've sent a confirmation link to your email address. Please click the link to verify your account and complete the signup process.
-            </p>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setEmailSent(false);
-                setIsLogin(true);
-              }}
-              className="w-full"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Login
-            </Button>
-          </div>
-        </motion.div>
-      </div>
-    );
-  }
 
   // Show loading state while confirming email
   if (isConfirming) {
@@ -587,6 +552,33 @@ const Auth = () => {
                 <p className="text-xs text-muted-foreground">
                   Password must be at least 8 characters with uppercase, lowercase, and a number.
                 </p>
+
+                <FormField
+                  control={signupForm.control}
+                  name="tos"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md p-4 border">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel className="text-sm font-normal">
+                          I agree to the{' '}
+                          <a href="#" className="text-primary hover:underline">
+                            Terms of Service
+                          </a>{' '}
+                          and{' '}
+                          <a href="#" className="text-primary hover:underline">
+                            Privacy Policy
+                          </a>
+                        </FormLabel>
+                      </div>
+                    </FormItem>
+                  )}
+                />
 
                 <Button type="submit" className="w-full btn-primary" disabled={isLoading}>
                   {isLoading ? 'Creating account...' : 'Create Account'}

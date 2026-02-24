@@ -19,6 +19,7 @@ import { Loader2 } from "lucide-react";
 const Index = lazy(() => import("./pages/Index"));
 const DestinationDetail = lazy(() => import("./pages/DestinationDetail"));
 const Auth = lazy(() => import("./pages/Auth"));
+const SignupSuccess = lazy(() => import("./pages/SignupSuccess"));
 const Profile = lazy(() => import("./pages/Profile"));
 const SavedPlaces = lazy(() => import("./pages/SavedPlaces"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
@@ -54,6 +55,7 @@ const AnimatedRoutes = () => {
         <Routes location={location}>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/auth/success" element={<SignupSuccess />} />
           <Route path="/destination/:id" element={<DestinationDetail />} />
           <Route path="/category/:slug" element={<CategoryPage />} />
           <Route
